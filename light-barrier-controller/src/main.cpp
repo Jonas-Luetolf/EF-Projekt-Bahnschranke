@@ -4,9 +4,9 @@
 #define SLAVE_ADDR 0x01
 
 // light barrier input pins
-#define LIGHT_BARRIER_1 0
-#define LIGHT_BARRIER_2 1
-#define LIGHT_THRESHOLD 10
+#define LIGHT_BARRIER_1 26
+#define LIGHT_BARRIER_2 27
+#define LIGHT_THRESHOLD 20
 
 // master communication pins
 #define MASTER_CALL_PIN 2
@@ -17,16 +17,7 @@
 volatile uint8_t last_command_code = 0;
 volatile uint8_t last_trigger_direction = -1;
 
-
-/**
- * @brief Checks if the light beam is interrupted at the given analog sensor.
- *
- * @param analogPin Analog pin connected to the phototransistor.
- * @return true if the sensor value is below LIGHT_THRESHOLD (beam interrupted), false otherwise.
- */
-bool isTriggered(int analogPin) {
-  return analogRead(analogPin) < LIGHT_THRESHOLD;
-}
+// Core 0 I2C communication
 
 
 /**
@@ -105,7 +96,7 @@ void onRequest() {
   }
 }
 
-// Core 0 I2C communication
+
 void setup(){
   Serial.begin(11520000);
   
@@ -123,27 +114,37 @@ void loop() {
 }
 
 // Core 1 Handling of light barriers
-void setup1() {
-  pinMode(LIGHT_BARRIER_1, INPUT);
-  pinMode(LIGHT_BARRIER_2, INPUT);
 
+// store the time of last trigger; -1 not unhandled
+long lastTrigger1 = -1;
+long lastTrigger2 = -1;
+
+
+/**
+ * @brief Checks if the light beam is interrupted at the given analog sensor.
+ *
+ * @param analogPin Analog pin connected to the phototransistor.
+ * @return true if the sensor value is below LIGHT_THRESHOLD (beam interrupted), false otherwise.
+ */
+bool isTriggered(int analogPin) {
+  return analogRead(analogPin) < LIGHT_THRESHOLD;
+}
+
+
+void setup1() {
   pinMode(MASTER_CALL_PIN, OUTPUT); // Interrupt Pin for Master-Controller
 }
 
 
 void loop1() {
-  // store the time of last trigger; -1 not unhandled
-  long lastTrigger1 = -1;
-  long lastTrigger2 = -1;
-
   // check light barrier 1
-  if (analogRead(LIGHT_BARRIER_1) < LIGHT_THRESHOLD && lastTrigger1 == -1) {
+  if (isTriggered(LIGHT_BARRIER_1) && lastTrigger1 == -1) {
     Serial.println("INFO: light barrier 1 triggered");
     lastTrigger1 = millis();
   }
 
   // check light barrier 2
-  if (analogRead(LIGHT_BARRIER_1) < LIGHT_THRESHOLD && lastTrigger2 == -1) {
+  if (isTriggered(LIGHT_BARRIER_2) && lastTrigger2 == -1) {
     Serial.println("INFO: light barrier 2 triggered");
     lastTrigger2 = millis();
   }
