@@ -4,46 +4,33 @@
 #define SLAVE_ADDR 0x04
 #define SDA_PIN 0
 #define SCL_PIN 1
+#define RED_PIN 2
+#define YELLOW_PIN 3
+#define GREEN_PIN 4
 
 volatile uint8_t last_command_code = 0;
 
 
-void setup() {
-    pinMode(2, OUTPUT);
-    pinMode(3, OUTPUT);
-    pinMode(4, OUTPUT);
-/*
-    Serial.begin(115200);
 
-    Wire.setSDA(SDA_PIN);
-    Wire.setSCL(SCL_PIN);
-    Wire.begin(SLAVE_ADDR);
-  
-    Wire.onReceive(onReceive);
-    Wire.onRequest(onRequest);
-*/
-
-
-}
 
 void triggerRed() {
-    digitalWrite(3, LOW);
-    digitalWrite(4, LOW);
-    digitalWrite(2, HIGH);
+    digitalWrite(YELLOW_PIN, LOW);
+    digitalWrite(GREEN_PIN, LOW);
+    digitalWrite(RED_PIN, HIGH);
     return;
 }
 
 void triggerYellow() {
-    digitalWrite(2, LOW);
-    digitalWrite(4, LOW);
-    digitalWrite(3, HIGH);
+    digitalWrite(RED_PIN, LOW);
+    digitalWrite(GREEN_PIN, HIGH);
+    digitalWrite(YELLOW_PIN, HIGH);
     return;
 }
 
 void triggerGreen() {
-    digitalWrite(2, LOW);
-    digitalWrite(3, LOW);
-    digitalWrite(4, HIGH);
+    digitalWrite(RED_PIN, LOW);
+    digitalWrite(YELLOW_PIN, LOW);
+    digitalWrite(GREEN_PIN, HIGH);
     return;
 }
 
@@ -96,17 +83,38 @@ void onRequest() {
       }
 
       default:
-        Wire.write(-1);
+        Wire.write(1);
       }
       last_command_code = 0;
     }
   }
 
+  void setup() {
+    pinMode(2, OUTPUT);
+    pinMode(3, OUTPUT);
+    pinMode(4, OUTPUT);
+
+    Serial.begin(115200);
+
+    Wire.setSDA(SDA_PIN);
+    Wire.setSCL(SCL_PIN);
+    Wire.begin(SLAVE_ADDR);
+  
+    Wire.onReceive(onReceive);
+    Wire.onRequest(onRequest);
+
+
+}
+
 void loop() {
+    delay(100);
+    /* 
     triggerGreen();
-    delay(100);
+    delay(20);
     triggerYellow();
-    delay(100);
+    delay(20);
     triggerRed();
-    delay(100);
+    delay(20);
+
+    */
 }
