@@ -52,7 +52,7 @@ void onReceive(int numBytes){
 
 
 /**
- * @brief Responds to requests from the I2C master.
+ * @brief Responds to requests from the I2C master and executes the comand set in last_command_code.
  * 
  * This function is called when the master requests data from the slave.
  * If no valid command was received, it returns -1 as an error indicator.
