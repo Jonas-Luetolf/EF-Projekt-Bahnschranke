@@ -167,12 +167,13 @@ void loop1() {
         last_trigger_direction = 0;
       }
     }
-
+    Serial.print("INFO: Trigger in direction: ");
+    Serial.println(last_trigger_direction);
     callMaster();
 
     // wait until both light barriers are rested
-    while (!isTriggered(LIGHT_BARRIER_1) && !isTriggered(LIGHT_BARRIER_2)) {
-      delay(50);
+    while (isTriggered(LIGHT_BARRIER_1) || isTriggered(LIGHT_BARRIER_2)) {
+      delay(1000);
     }
 
     // reset last trigger times to no trigger
