@@ -13,9 +13,13 @@
 #define SERVO_SPEED 15
 #define START_ANGLE 0
 #define TARGET_ANGLE 180
+#define SERVO_PIN 6
+
+#define BARRIER_STATE_PIN 7
 
 // global variables
 volatile uint8_t last_command_code = 0;
+volatile uint8_t pending_command = 0;
 Servo barrierServo;
 
 // Core 0 I2C communication and handling of servo actions
@@ -68,25 +72,19 @@ void onReceive(int numBytes){
   void onRequest() {
     if (last_command_code == 0){
       Serial.println("WARNING: Request without command");
-      Wire.write(-1);
+      Wire.write(1);
     }
   
     else {
       switch (last_command_code)
       {
       // 0x01 close
-      case 0x01:
-      Serial.print("INFO: executed command ");
-      Serial.println(last_command_code, HEX);
-      closeBarrier();
-      Wire.write(0);
-      break;
-    
       // 0x02 open
+      case 0x01:
       case 0x02:
         Serial.print("INFO: executed command ");
         Serial.println(last_command_code, HEX);
-        openBarrier();
+        pending_command = last_command_code;
         Wire.write(0);
         break;
 
@@ -96,8 +94,7 @@ void onReceive(int numBytes){
         Serial.print("INFO: executed command");
         Serial.println(last_command_code, HEX);
   
-        //TODO: check barrier state
-        uint8_t state = 0;
+        uint8_t state = digitalRead(BARRIER_STATE_PIN);
 
         Serial.print("INFO: send barrier stat:");
         Serial.print(state);
@@ -108,7 +105,7 @@ void onReceive(int numBytes){
       }
 
       default:
-        Wire.write(-1);
+        Wire.write(1);
       }
       last_command_code = 0;
     }
@@ -127,15 +124,26 @@ void setup() {
   Wire.onRequest(onRequest);
 
   // init Servo
-  barrierServo.attach(9); // GP9 -> Pin 12 (Pi Pico)
+  barrierServo.attach(SERVO_PIN);
   barrierServo.write(START_ANGLE);
+
+  pinMode(BARRIER_STATE_PIN, INPUT);
   Serial.print("INFO: init Servo; moved to");
   Serial.print(START_ANGLE);
   Serial.println("°");
   delay(500);
 }
 
-
 void loop() {
+  // check if an command has to be executed
+  if (pending_command != 0) {
+    if (pending_command == 0x01) {
+      closeBarrier();
+    } else if (pending_command == 0x02) {
+      openBarrier();
+    }
+    pending_command = 0;
+  }
+  
   delay(100);
 }
