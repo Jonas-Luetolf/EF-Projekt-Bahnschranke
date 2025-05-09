@@ -15,21 +15,21 @@
 volatile uint8_t last_command_code = 0;
 
 
-void triggerRed() {
+void trigger0() {
     digitalWrite(YELLOW_PIN, LOW);
     digitalWrite(GREEN_PIN, LOW);
     digitalWrite(RED_PIN, HIGH);
 }
 
 
-void triggerYellow() {
+void trigger2() {
     digitalWrite(RED_PIN, LOW);
     digitalWrite(GREEN_PIN, HIGH);
     digitalWrite(YELLOW_PIN, HIGH);
 }
 
 
-void triggerGreen() {
+void trigger1() {
     digitalWrite(RED_PIN, LOW);
     digitalWrite(YELLOW_PIN, LOW);
     digitalWrite(GREEN_PIN, HIGH);
@@ -59,7 +59,7 @@ void onRequest() {
       Serial.print("INFO: executed command ");
       Serial.println(last_command_code, HEX);
 
-      triggerRed();
+      trigger0();
       
       Wire.write(0);
       break;
@@ -69,8 +69,8 @@ void onRequest() {
         Serial.print("INFO: executed command ");
         Serial.println(last_command_code, HEX);
 
-        triggerYellow();
-        triggerGreen();
+        trigger2();
+  
         
         Wire.write(0);
         break;
@@ -81,7 +81,7 @@ void onRequest() {
         Serial.print("INFO: executed command ");
         Serial.println(last_command_code, HEX);
   
-        triggerGreen();
+        trigger1();
 
         Wire.write(0);
         break;
