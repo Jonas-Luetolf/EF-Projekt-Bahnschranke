@@ -6,7 +6,7 @@
 // light barrier input pins
 #define LIGHT_BARRIER_1 26
 #define LIGHT_BARRIER_2 27
-#define LIGHT_THRESHOLD 20
+#define LIGHT_THRESHOLD 15
 
 // master communication pins
 #define MASTER_CALL_PIN 2
@@ -15,7 +15,7 @@
 
 // global variables
 volatile uint8_t last_command_code = 0;
-volatile uint8_t last_trigger_direction = -1;
+volatile uint8_t last_trigger_direction = 0;
 
 // Core 0 I2C communication
 
@@ -73,7 +73,7 @@ void onRequest() {
       Serial.print("INFO: executed command");
       Serial.println(last_command_code, HEX);
 
-      if (last_trigger_direction != -1){
+      if (last_trigger_direction != 0){
         Serial.print("INFO: send ");
         Serial.print(last_trigger_direction);
         Serial.println("back to master");
@@ -86,7 +86,7 @@ void onRequest() {
       Wire.write(last_trigger_direction);
 
       // reset last trigger direction to no Trigger / Error
-      last_trigger_direction = -1;
+      last_trigger_direction = 0;
       break;
     
     default:
